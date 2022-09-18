@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(() => {
   })
 })
 
-import { Config, Format } from '../type/type'
+import { Config } from '../type/type'
 import path from 'path'
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 // @ts-ignore
