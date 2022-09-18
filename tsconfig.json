@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "strict": true,
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "types": [
+      "chrome",
+      "node"
+    ]
+  },
+  "include": [
+    "./src/**/*",
+    "vue-shims.d.ts",
+    "./src/**/*.vue"
+  ]
+}
