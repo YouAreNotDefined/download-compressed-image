@@ -1,15 +1,18 @@
 const path = require('path')
 const webpack = require('webpack')
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const { VueLoaderPlugin } = require('vue-loader')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = {
+  mode: 'development',
+  target: 'node',
   context: path.resolve(__dirname),
   entry: {
-    popup: './src/popup/main.js',
-    background: './src/background/main.js',
-    content: './src/content/main.js'
+    popup: './src/popup/main.ts',
+    background: './src/background/main.ts',
+    content: './src/content/main.ts'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -23,15 +26,17 @@ module.exports = {
       '~': path.resolve(__dirname)
     }
   },
-  devServer: {
-    open: true,
-    hot: true
-  },
   module: {
     rules: [
       {
         test: /\.js$/,
-        use: 'babel-loader'
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+          },
+        },
       },
       {
         test: /\.vue$/,
@@ -42,22 +47,43 @@ module.exports = {
         use: [
           'vue-style-loader',
           'css-loader',
-          'postcss-loader'
         ]
       },
       {
+        test: /\.s(c|a)ss$/,
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            // Requires >= sass-loader@^8.0.0
+            options: {
+              implementation: require('sass'),
+              sassOptions: {
+                indentedSyntax: false // optional
+              },
+            },
+          },
+        ],
+      },
+      {
         test: /\.ts$/,
-        loader: 'ts-loader',
-        exclude: /node_modules/,
-        options: {
-          appendTsSuffixTo: [/\.vue$/],
-        }
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [/\.vue$/]
+            }
+          }
+        ],
+        exclude: /node_modules/
       }
     ]
   },
   plugins: [
     new CleanWebpackPlugin(),
     new VueLoaderPlugin(),
+    new VuetifyLoaderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new CopyWebpackPlugin({
       patterns: [

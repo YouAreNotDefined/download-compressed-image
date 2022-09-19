@@ -24,4 +24,17 @@ interface Config {
   format: typeof Format[keyof typeof Format]
 }
 
-export { Config, Method, Format }
+const defaultConfig: Config = {
+  resize: {
+    enabled: false,
+    width: 640,
+    height: 640,
+    premultiply:true,
+    linearRGB: true,
+    method: 'lanczos3'
+  },
+  quality: 75,
+  format: 'mozjpeg',
+}
+
+export { defaultConfig, Config, Method, Format }

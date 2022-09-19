@@ -1,11 +1,8 @@
-import 'vuetify/styles'
-import { createApp } from "vue"
-import { createVuetify } from 'vuetify'
+import Vue from "vue"
+import vuetify from '../plugins/vuetify'
 import App from "./App.vue"
-import './index.css'
 
-const app = createApp({ App })
-const vuetify = createVuetify()
-
-app.use(vuetify)
-app.mount('#app')
+new Vue({
+  vuetify,
+  render: h => h(App)
+}).$mount('#app')

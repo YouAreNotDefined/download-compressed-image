@@ -1,15 +1,4 @@
-chrome.windows.onRemoved.addListener(() => {
-  chrome.storage.local.clear()
-})
-
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: 'download',
-    title: '圧縮ダウンロード'
-  })
-})
-
-import { Config } from '../type/type'
+import { defaultConfig, Config } from '../type/type'
 import path from 'path'
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 // @ts-ignore
@@ -18,33 +7,46 @@ import { ImagePool } from '@squoosh/lib' // No types
 let config: Config
 const imagePool = new ImagePool()
 
-chrome.runtime.onMessage.addListener((req) => {
-  config = JSON.parse(req)
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.set({ 'config': JSON.stringify(defaultConfig) })
+  chrome.contextMenus.create({
+    id: 'download',
+    title: '圧縮ダウンロード'
+  })
 })
 
 chrome.contextMenus.onClicked.addListener(async (item) => {
   const currentTabId = await getCurrentTabId()
   if (!currentTabId) return
+  chrome.storage.local.get("config", (value) => {
+    config = JSON.parse(value.config)
+  })
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id!, "getClickedEl", res => {
+    chrome.tabs.sendMessage(tabs[0].id!, "", res => {
       const pattern = new RegExp('/<img.*?src\s*=\s*[\"|\'](.*?)[\"|\'].*?>/i')
       const imgTag = res.value.match(pattern)
       if (!imgTag) return
       const src = imgTag[1]
       const { name, image } = getImage(src)
-      // @ts-ignore
-      if (config.resize.enabled) await image.preprocess({ rezize: config.resize })
-      let encodeOptions: {
+      const encodeOptions: {
         mozjpeg?: { quality: Number }
         oxipng?: { quality: Number }
         webp?: { quality: Number }
       } = {}
-      encodeOptions[config.format] = { quality: config.quality }
-      // @ts-ignore
-      await image.encode(encodeOptions)
-      download(image, name)
-      // @ts-ignore
-      await imagePool.close()
+      if (config.resize.enabled) {
+        // @ts-ignore
+        (async () => {
+          await image.preprocess({ rezize: config.resize })
+        })()
+      }
+      (async () => {
+        encodeOptions[config.format] = { quality: config.quality }
+        // @ts-ignore
+        await image.encode(encodeOptions)
+        download(image, name)
+        // @ts-ignore
+        await imagePool.close()
+      })()
     })
   })
 })
@@ -61,18 +63,20 @@ function desktopDir() {
 }
 
 function download(image: any, name: string) {
-  let data
-  // @ts-ignore
-  if (image.encodedWith.mozjpeg) data = await image.encodedWith.mozjpeg
-  // @ts-ignore
-  if (image.encodedWith.oxipng) data = await image.encodedWith.oxipng
-  // @ts-ignore
-  if (image.encodedWith.webp) data = await image.encodedWith.webp
+  let data!: Uint8Array
+  (async () => {
+    // @ts-ignore
+    if (image.encodedWith.mozjpeg) data = await image.encodedWith.mozjpeg.binary
+    // @ts-ignore
+    if (image.encodedWith.oxipng) data = await image.encodedWith.oxipng.binary
+    // @ts-ignore
+    if (image.encodedWith.webp) data = await image.encodedWith.webp.binary
+  })()
 
   const OUTPUTDIR = `${desktopDir}/download-compressed-image`
   if (!existsSync(OUTPUTDIR)) mkdirSync(OUTPUTDIR)
 
-  writeFileSync(`${OUTPUTDIR}/${name}`, data.binary)
+  writeFileSync(`${OUTPUTDIR}/${name}`, data)
 }
 
 function getImage(url: string) {
