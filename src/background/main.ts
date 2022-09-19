@@ -1,3 +1,5 @@
+import "core-js/stable"
+import "regenerator-runtime/runtime"
 import { defaultConfig, Config } from '../type/type'
 import path from 'path'
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
@@ -18,10 +20,10 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener(async (item) => {
   const currentTabId = await getCurrentTabId()
   if (!currentTabId) return
-  chrome.storage.local.get("config", (value) => {
+  chrome.storage.local.get("config", value => {
     config = JSON.parse(value.config)
   })
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     chrome.tabs.sendMessage(tabs[0].id!, "", res => {
       const pattern = new RegExp('/<img.*?src\s*=\s*[\"|\'](.*?)[\"|\'].*?>/i')
       const imgTag = res.value.match(pattern)

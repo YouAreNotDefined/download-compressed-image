@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-container
-      class="px-0"
+      class="v-application px-0"
       fluid
     >
       <h1 class="h1 pa-4">Configuration</h1>
@@ -33,26 +33,28 @@
 </template>
 
 <script lang="ts">
+import { Vue } from 'vue-property-decorator'
+import Component from 'vue-class-component'
 import { VBtn, VApp, VContainer, VSwitch, VSelect, VCheckbox, VTextField, VSlider } from 'vuetify/lib'
 import { defaultConfig, Method, Format } from '../type/type'
 
-export default {
-  components: { VBtn, VApp, VContainer, VSwitch, VSelect, VCheckbox, VTextField, VSlider },
-  data() {
-    return {
-      config: defaultConfig,
-      methodList: Object.values(Method),
-      formatList: Object.values(Format),
-      saving: false,
-    }
+@Component({
+  components: {
+    VBtn, VApp, VContainer, VSwitch, VSelect, VCheckbox, VTextField, VSlider
   },
-  methods: {
-    saveConfig() {
-      this.saving = true
-      chrome.storage.local.set({'config': JSON.stringify(this.config)}, () => {
-        this.saving = false
-      })
-    }
-  },
+})
+
+export default class App extends Vue {
+  config = defaultConfig
+  readonly methodList = Object.values(Method)
+  readonly formatList = Object.values(Format)
+  saving = false
+
+  saveConfig() {
+    this.saving = true
+    chrome.storage.local.set({'config': JSON.stringify(this.config)}, () => {
+      this.saving = false
+    })
+  }
 }
 </script>

@@ -7,7 +7,7 @@ const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = {
   mode: 'development',
-  target: 'node',
+  // target: "node",
   context: path.resolve(__dirname),
   entry: {
     popup: './src/popup/main.ts',
@@ -24,6 +24,13 @@ module.exports = {
       vue$: 'vue/dist/vue.esm.js',
       '@': path.resolve(__dirname, 'src'),
       '~': path.resolve(__dirname)
+    },
+    fallback: {
+      "worker_threads": false,
+      "os": require.resolve("os-browserify/browser"),
+      "fs": false,
+      "url": require.resolve("url/"),
+      "perf_hooks": false,
     }
   },
   module: {
@@ -60,7 +67,7 @@ module.exports = {
             options: {
               implementation: require('sass'),
               sassOptions: {
-                indentedSyntax: false // optional
+                indentedSyntax: true // optional
               },
             },
           },
@@ -85,6 +92,9 @@ module.exports = {
     new VueLoaderPlugin(),
     new VuetifyLoaderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
     new CopyWebpackPlugin({
       patterns: [
         {

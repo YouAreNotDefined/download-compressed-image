@@ -6,6 +6,10 @@
     "module": "ES2015",
     "moduleResolution": "node",
     "target": "ES5",
+    "lib": [
+      "ES2020",
+      "dom",
+    ],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
