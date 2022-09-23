@@ -1,67 +1,92 @@
 <template>
-  <v-app>
+  <v-app style="width: 400px">
     <v-container
       class="v-application px-0"
       fluid
     >
-      <h1 class="h1 pa-4">Configuration</h1>
-      <div class="flex justify-space-between pa-3">
-        <h2 class="h2 mb-3">RESIZE</h2>
-        <v-select
-          v-model="options.resize"
-          :rules="rules.resize"
-          required
-          class="mb-3"
-          :items="resizeList"
-          label="Resize Format"
-        />
-      </div>
-      <v-text-field v-model="options.width" :rules="rules.number" required class="mb-3" label="Width" outlined />
-      <v-text-field v-model="options.height" :rules="rules.number" required class="mb-4" label="Height" outlined />
-      <h2 class="h2 mb-4">COMPRESS</h2>
-      <v-select
-        v-model="options.mimeType"
-        :rules="rules.mime"
-        required
-        class="mb-3"
-        :items="mimeList"
-        label="Output Format"
-      />
-      <v-slider
-        v-model="quality"
-        class="mb-4"
-        label="Quality"
-        thumb-label="always"
-        max="100"
-        min="0"
-        required
-      />
-      <v-text-field
-        v-model="options.maxWidth"
-        :rules="rules.number"
-        required
-        class="mb-3"
-        label="Output Image Max Width"
-        outlined
-      />
-      <v-text-field
-        v-model="options.maxHeight"
-        :rules="rules.number"
-        required
-        class="mb-3"
-        label="Output Image Max Height"
-        outlined
-      />
-      <v-alert v-show="!isValidated" class="mb-3" type="error">There is an incorrect entry</v-alert>
-      <v-btn
-        class="text-center"
-        color="primary"
-        elevation="2"
-        :loading="saving"
-        @click="saveOptions"
-      >
-        Save
-      </v-btn>
+    <v-row>
+      <v-col class="pa-10">
+        <v-form v-model="isValidated">
+          <h1 class="h1 mb-3">Configuration</h1>
+          <v-select
+            v-model="options.resize"
+            :rules="rules.resize"
+            required
+            class="mb-2"
+            :items="resizeList"
+            label="Resize Format"
+          />
+          <div v-show="options.resize !== 'none'">
+            <v-text-field
+              v-model="options.width"
+              :rules="rules.number"
+              required
+              class="mb-2"
+              label="Resize Width"
+              outlined
+              type="number"
+            />
+            <v-text-field
+              v-model="options.height"
+              :rules="rules.number"
+              required
+              class="mb-2"
+              label="Resize Height"
+              outlined
+              type="number"
+            />
+          </div>
+          <h2 class="h2 mb-2">COMPRESS</h2>
+          <v-select
+            v-model="options.mimeType"
+            :rules="rules.mime"
+            required
+            class="mb-2"
+            :items="mimeList"
+            label="Output Format"
+          />
+          <v-slider
+            v-model="quality"
+            class="mb-2"
+            label="Quality"
+            thumb-label="always"
+            max="100"
+            min="0"
+            required
+          />
+          <v-text-field
+            v-model="options.maxWidth"
+            :rules="rules.number"
+            required
+            class="mb-2"
+            label="Output Image Max Width"
+            outlined
+            type="number"
+          />
+          <v-text-field
+            v-model="options.maxHeight"
+            :rules="rules.number"
+            required
+            class="mb-2"
+            label="Output Image Max Height"
+            outlined
+            type="number"
+          />
+          <v-alert v-show="!isValidated" class="mb-3" type="error">There is an incorrect entry</v-alert>
+          <div class="text-center">
+            <v-btn
+              color="primary"
+              elevation="2"
+              :loading="saving"
+              :disabled="!isValidated"
+              @click="saveOptions"
+            >
+              SAVE
+            </v-btn>
+          </div>
+        </v-form>
+      </v-col>
+    </v-row>
     </v-container>
   </v-app>
 </template>
@@ -80,13 +105,13 @@ import { defaultOptions } from "../common"
 
 export default class App extends Vue {
   options = defaultOptions
-  readonly resizeList = ['auto', 'contain', 'cover']
+  readonly resizeList = ['none', 'contain', 'cover']
   readonly mimeList = ['auto', 'image/jpeg', 'image/png', 'image/webp']
   saving = false
   rules = {
     number: [
       (v: any) => !!v || 'This is required',
-      (v: any) => isNaN(v) || 'This must be Number',
+      (v: any) => !isNaN(parseInt(v)) || 'This must be Number',
     ],
     resize: [
       (v: any) => !!v || 'This is required',
@@ -97,18 +122,17 @@ export default class App extends Vue {
       (v: any) => this.mimeList.includes(v) || 'Incorrect choice',
     ],
   }
-  isValidated = true
+  isValidated = false
 
   public get quality(): number {
     if (this.options.quality === undefined) return 70
-    return this.options.quality * 10
+    return this.options.quality * 100
   }
   public set quality(v: number) {
-    this.options.quality = v / 10
+    this.options.quality = v / 100
   }
 
   saveOptions() {
-    this.isValidated = Object.values(this.rules).every(v => v)
     if(!this.isValidated) return
     this.saving = true
     chrome.storage.local.set({'options': JSON.stringify(this.options)}, () => {

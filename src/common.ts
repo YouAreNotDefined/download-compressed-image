@@ -8,8 +8,8 @@ const defaultOptions:Compressor.Options  = {
   width: 640,
   height: 640,
   mimeType: 'auto',
-  maxWidth: Infinity,
-  maxHeight: Infinity,
+  maxWidth: 1000,
+  maxHeight: 1000,
 }
 
 export { defaultOptions }
