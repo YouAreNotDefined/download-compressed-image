@@ -16,7 +16,8 @@
     "types": [
       "chrome",
       "node",
-      "vuetify"
+      "vuetify",
+      "file-saver"
     ]
   },
   "include": [

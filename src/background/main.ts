@@ -1,90 +1,64 @@
-import "core-js/stable"
-import "regenerator-runtime/runtime"
-import { defaultConfig, Config } from '../type/type'
-import path from 'path'
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
-// @ts-ignore
-import { ImagePool } from '@squoosh/lib' // No types
+import { saveAs } from 'file-saver'
+import Compressor from 'compressorjs'
+import { defaultOptions } from "../common"
 
-let config: Config
-const imagePool = new ImagePool()
+let options = defaultOptions
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.set({ 'config': JSON.stringify(defaultConfig) })
+  chrome.storage.local.set({ 'options': JSON.stringify(options) })
   chrome.contextMenus.create({
     id: 'download',
     title: '圧縮ダウンロード'
   })
 })
 
-chrome.contextMenus.onClicked.addListener(async (item) => {
-  const currentTabId = await getCurrentTabId()
-  if (!currentTabId) return
-  chrome.storage.local.get("config", value => {
-    config = JSON.parse(value.config)
+chrome.contextMenus.onClicked.addListener(async () => {
+  const currentTab = await getCurrentTab()
+  if (!currentTab.id) return
+  chrome.storage.local.get('options', value => {
+    options = JSON.parse(value.options)
   })
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    chrome.tabs.sendMessage(tabs[0].id!, "", res => {
-      const pattern = new RegExp('/<img.*?src\s*=\s*[\"|\'](.*?)[\"|\'].*?>/i')
-      const imgTag = res.value.match(pattern)
-      if (!imgTag) return
-      const src = imgTag[1]
-      const { name, image } = getImage(src)
-      const encodeOptions: {
-        mozjpeg?: { quality: Number }
-        oxipng?: { quality: Number }
-        webp?: { quality: Number }
-      } = {}
-      if (config.resize.enabled) {
-        // @ts-ignore
-        (async () => {
-          await image.preprocess({ rezize: config.resize })
-        })()
-      }
-      (async () => {
-        encodeOptions[config.format] = { quality: config.quality }
-        // @ts-ignore
-        await image.encode(encodeOptions)
-        download(image, name)
-        // @ts-ignore
-        await imagePool.close()
-      })()
-    })
+  chrome.tabs.sendMessage(currentTab.id, "", async (res) => {
+    const pattern = new RegExp('/<img.*?src\s*=\s*[\"|\'](.*?)[\"|\'].*?>/i')
+    const imgTag = res.value.match(pattern)
+    if (!imgTag) return
+    const url = imgTag[1]
+    const imageBlob = await getImage(url)
+    compressSave(imageBlob, url)
   })
 })
 
-async function getCurrentTabId() {
+async function getCurrentTab() {
   const queryOptions = { active: true, lastFocusedWindow: true }
   const [tab] = await chrome.tabs.query(queryOptions)
-  return tab.id
+  return tab
 }
 
-function desktopDir() {
-  const home = process.env[process.platform === "win32" ? "USERPROFILE" : "HOME"]
-  return path.join(home!, "Desktop")
+async function getImage(url: string) {
+  const uri = await getImageUrl(url)
+  const res = await fetch(uri)
+  const blob = await res.blob()
+  return blob
 }
 
-function download(image: any, name: string) {
-  let data!: Uint8Array
-  (async () => {
-    // @ts-ignore
-    if (image.encodedWith.mozjpeg) data = await image.encodedWith.mozjpeg.binary
-    // @ts-ignore
-    if (image.encodedWith.oxipng) data = await image.encodedWith.oxipng.binary
-    // @ts-ignore
-    if (image.encodedWith.webp) data = await image.encodedWith.webp.binary
-  })()
-
-  const OUTPUTDIR = `${desktopDir}/download-compressed-image`
-  if (!existsSync(OUTPUTDIR)) mkdirSync(OUTPUTDIR)
-
-  writeFileSync(`${OUTPUTDIR}/${name}`, data)
+async function getImageUrl(url: string) {
+  const pattern = new RegExp(/http(s)?:|\/\//)
+  if (pattern.test(url)) return url
+  const currentTab = await getCurrentTab()
+  return `${currentTab.url}${url}`
 }
 
-function getImage(url: string) {
-  const file = readFileSync(url)
+function getImageName(url: string): string {
   const pattern = new RegExp('.+/(.+?)\.[a-z]+([\?#;].*)?$')
-  const fileName = url.match(pattern)![1]
-  const image = imagePool.ingestImage(file)
-  return { name: fileName, image }
+  return url.match(pattern)![1]
+}
+
+function compressSave(blob: Blob, url: string) {
+  options.success = (result) => {
+    saveAs(result, getImageName(url))
+  }
+  options.error = (error) => {
+    alert(error.message)
+  }
+  new Compressor(blob, options)
 }

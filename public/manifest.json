@@ -12,7 +12,7 @@
   },
   "permissions": [
     "storage",
-    "activeTab",
+    "tabs",
     "contextMenus"
   ],
   "content_scripts": [

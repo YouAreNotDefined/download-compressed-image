@@ -25,13 +25,6 @@ module.exports = {
       '@': path.resolve(__dirname, 'src'),
       '~': path.resolve(__dirname)
     },
-    fallback: {
-      "worker_threads": false,
-      "os": require.resolve("os-browserify/browser"),
-      "fs": false,
-      "url": require.resolve("url/"),
-      "perf_hooks": false,
-    }
   },
   module: {
     rules: [
