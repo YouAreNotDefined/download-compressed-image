@@ -9,6 +9,7 @@ module.exports = {
   mode: 'development',
   // target: "node",
   context: path.resolve(__dirname),
+  devtool: 'cheap-module-source-map',
   entry: {
     popup: './src/popup/main.ts',
     background: './src/background/main.ts',
@@ -16,7 +17,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js'
+    filename: '[name].js',
+    publicPath: '',
   },
   resolve: {
     extensions: ['.ts', '.js', '.vue', '.json'],

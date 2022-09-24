@@ -103,7 +103,7 @@ import { VBtn, VApp, VContainer, VSwitch, VSelect, VCheckbox, VTextField, VSlide
 })
 
 export default class App extends Vue {
-  options:Compressor.Options = {}
+  options: Compressor.Options = {}
   readonly resizeList = ['none', 'contain', 'cover']
   readonly mimeList = ['auto', 'image/jpeg', 'image/png', 'image/webp']
   saving = false

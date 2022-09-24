@@ -14,7 +14,8 @@
     "storage",
     "tabs",
     "contextMenus",
-    "activeTab"
+    "activeTab",
+    "notifications"
   ],
   "content_scripts": [
     {
@@ -25,5 +26,8 @@
         "content.js"
       ]
     }
-  ]
+  ],
+  "icons": {
+    "48": "arrow-collapse-all.png"
+  }
 }
