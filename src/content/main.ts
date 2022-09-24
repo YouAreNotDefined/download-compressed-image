@@ -22,7 +22,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
 function compressSave(blob: Blob, url: string) {
   options.success = (result: Blob) => {
-    const file = new File([result], getImageName(url), { type: options.mimeType })
+    const file = new File([result], getImageName(url), { type: result.type })
     saveAs(file)
   }
   options.error = (err) => {
