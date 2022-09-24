@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "download-compressed-image",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "download-compressed-image",
   "background": {
     "service_worker": "background.js"
@@ -14,8 +14,7 @@
     "storage",
     "tabs",
     "contextMenus",
-    "activeTab",
-    "notifications"
+    "activeTab"
   ],
   "content_scripts": [
     {
