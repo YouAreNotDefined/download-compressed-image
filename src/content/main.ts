@@ -1,6 +1,6 @@
 let clickedEl: HTMLElement | null
 
-document.addEventListener("contextmenu", event => {
+document.addEventListener('contextmenu', event => {
   clickedEl = event.target as HTMLElement
 }, true)
 

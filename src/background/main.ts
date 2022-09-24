@@ -7,45 +7,40 @@ let options = defaultOptions
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ 'options': JSON.stringify(options) })
   chrome.contextMenus.create({
-    id: 'download',
-    title: '圧縮ダウンロード'
+    id: 'compressed-download',
+    title: 'Compressed Download',
+    contexts: ['image'],
   })
 })
 
-chrome.contextMenus.onClicked.addListener(async () => {
-  const currentTab = await getCurrentTab()
-  if (!currentTab.id) return
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (!tab || !tab.id) return
+  if (info.menuItemId !== 'compressed-download') return
   chrome.storage.local.get('options', value => {
     options = JSON.parse(value.options)
   })
-  chrome.tabs.sendMessage(currentTab.id, "", async (res) => {
+  chrome.tabs.sendMessage(tab.id, "", async (res) => {
+    if (!res.value) return
     const pattern = new RegExp('/<img.*?src\s*=\s*[\"|\'](.*?)[\"|\'].*?>/i')
     const imgTag = res.value.match(pattern)
     if (!imgTag) return
     const url = imgTag[1]
-    const imageBlob = await getImage(url)
+    const imageBlob = await getImage(url, tab)
     compressSave(imageBlob, url)
   })
 })
 
-async function getCurrentTab() {
-  const queryOptions = { active: true, lastFocusedWindow: true }
-  const [tab] = await chrome.tabs.query(queryOptions)
-  return tab
-}
-
-async function getImage(url: string) {
-  const uri = await getImageUrl(url)
+async function getImage(url: string, tab: chrome.tabs.Tab) {
+  const uri = await getImageUrl(url, tab)
   const res = await fetch(uri)
   const blob = await res.blob()
   return blob
 }
 
-async function getImageUrl(url: string) {
+async function getImageUrl(url: string, tab: chrome.tabs.Tab) {
   const pattern = new RegExp(/http(s)?:|\/\//)
   if (pattern.test(url)) return url
-  const currentTab = await getCurrentTab()
-  return `${currentTab.url}${url}`
+  return `${tab.url}${url}`
 }
 
 function getImageName(url: string): string {
