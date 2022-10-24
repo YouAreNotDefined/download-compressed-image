@@ -1,5 +1,6 @@
 import { saveAs } from 'file-saver'
 import Compressor from 'compressorjs'
+import Jimp from "jimp/browser/lib/jimp"
 
 let options: Compressor.Options
 
@@ -9,9 +10,17 @@ chrome.runtime.onConnect.addListener((port) => {
     chrome.storage.local.get('options', value => {
       options = JSON.parse(value.options)
     })
-    getImage(data.info)
-      .then(blob => {
-        compressSave(blob, data.info.srcUrl)
+    // getImage(data.info)
+    //   .then(blob => {
+    //     compressSave(blob, data.info.srcUrl)
+    //   })
+    //   .catch(err => {
+    //     console.error(err)
+    //     throw new Error(err)
+    //   })
+    getImageBuffer(data.info)
+      .then(buffer => {
+        runJimp(buffer)
       })
       .catch(err => {
         console.error(err)
@@ -20,23 +29,26 @@ chrome.runtime.onConnect.addListener((port) => {
   })
 })
 
-function compressSave(blob: Blob, url: string) {
-  options.success = (result: Blob) => {
-    const file = new File([result], getImageName(url), { type: result.type })
-    saveAs(file)
-  }
-  options.error = (err) => {
-    console.error(err)
-    throw new Error(err.message)
-  }
-  new Compressor(blob, options)
+function runJimp(buffer: ArrayBuffer) {
+  new Jimp({ data: buffer }, (err: Error, image: Jimp) => {
+    if (err) {
+      console.error(err)
+      throw new Error(err.message)
+    }
+
+  })
 }
 
-async function getImage(info: chrome.contextMenus.OnClickData) {
+function save(buffer: ArrayBuffer, url: string, type: string) {
+  const file = new File([buffer], getImageName(url), { type })
+  saveAs(file)
+}
+
+async function getImageBuffer(info: chrome.contextMenus.OnClickData) {
   const url = getImageUrl(info)
   const res = await fetch(url)
-  const blob = await res.blob()
-  return blob
+  const buffer = res.arrayBuffer()
+  return buffer
 }
 
 function getImageUrl(info: chrome.contextMenus.OnClickData): string {
