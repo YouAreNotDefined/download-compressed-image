@@ -5,7 +5,7 @@
       fluid
     >
       <v-row>
-        <v-col class="pa-10">
+        <v-col class="pa-8">
           <v-form v-model="isValidated">
             <h1 class="h1 mb-3">Configuration</h1>
             <v-select
@@ -15,27 +15,26 @@
               class="mb-2"
               :items="resizeList"
               label="Resize Format"
+              persistent-hint
             />
-            <div v-show="options.resize !== 'none'">
-              <v-text-field
-                v-model="options.width"
-                :rules="rules.number"
-                required
-                class="mb-2"
-                label="Resize Width"
-                outlined
-                type="number"
-              />
-              <v-text-field
-                v-model="options.height"
-                :rules="rules.number"
-                required
-                class="mb-2"
-                label="Resize Height"
-                outlined
-                type="number"
-              />
-            </div>
+            <v-text-field
+              v-model="options.width"
+              class="mb-2"
+              label="Width of the output image"
+              outlined
+              type="number"
+              persistent-hint
+              hint="If the Height option is set, the Width will be computed automatically"
+            />
+            <v-text-field
+              v-model="options.height"
+              class="mb-2"
+              label="Height of the output image"
+              outlined
+              type="number"
+              persistent-hint
+              hint="If the Width option is set, the Height will be computed automatically"
+            />
             <h2 class="h2 mb-2">COMPRESS</h2>
             <v-select
               v-model="options.mimeType"
