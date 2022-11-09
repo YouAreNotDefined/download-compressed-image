@@ -54,5 +54,5 @@ function getImageName(url: string): string {
     pattern = new RegExp('.+/(.+?)\.[a-z]+([\?#;].*)?$')
     extend = `.${options.mimeType?.replace('image/', '')}`
   }
-  return `${url.match(pattern)![1]}${extend}`
+  return `${url.toLowerCase().match(pattern)![1]}${extend}`
 }
