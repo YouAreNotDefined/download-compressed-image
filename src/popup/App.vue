@@ -108,16 +108,16 @@ export default class App extends Vue {
   saving = false
   rules = {
     number: [
-      (v: any) => !!v || 'This is required',
-      (v: any) => !isNaN(parseInt(v)) || 'This must be Number',
+      (v: number) => !!v || 'This is required',
+      (v: number) => !isNaN(v) || 'This must be Number',
     ],
     resize: [
-      (v: any) => !!v || 'This is required',
-      (v: any) => this.resizeList.includes(v) || 'Incorrect choice',
+      (v: string) => !!v || 'This is required',
+      (v: string) => this.resizeList.includes(v) || 'Incorrect choice',
     ],
     mime: [
-      (v: any) => !!v || 'This is required',
-      (v: any) => this.mimeList.includes(v) || 'Incorrect choice',
+      (v: string) => !!v || 'This is required',
+      (v: string) => this.mimeList.includes(v) || 'Incorrect choice',
     ],
   }
   isValidated = false
@@ -142,7 +142,7 @@ export default class App extends Vue {
     chrome.storage.local.set({'options': JSON.stringify(this.options)}, () => {
       setTimeout(() => {
         this.saving = false
-      }, 1000)
+      }, 500)
     })
   }
 }

@@ -1,6 +1,6 @@
 import Compressor from 'compressorjs'
 
-const defaultOptions:Compressor.Options  = {
+const defaultOptions: Compressor.Options = {
   strict: true,
   checkOrientation: true,
   quality: 0.7,
@@ -9,7 +9,7 @@ const defaultOptions:Compressor.Options  = {
   height: 640,
   mimeType: 'auto',
   maxWidth: 1000,
-  maxHeight: 1000,
+  maxHeight: 1000
 }
 
 export { defaultOptions }
