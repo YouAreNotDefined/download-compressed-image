@@ -3,8 +3,8 @@ import Compressor from 'compressorjs'
 
 let options: Compressor.Options
 
-chrome.runtime.onConnect.addListener((port) => {
-  port.onMessage.addListener((message) => {
+chrome.runtime.onConnect.addListener(port => {
+  port.onMessage.addListener(message => {
     const data = JSON.parse(message)
     chrome.storage.local.get('options', value => {
       options = JSON.parse(value.options)
@@ -25,7 +25,7 @@ function compressSave(blob: Blob, url: string) {
     const file = new File([result], getImageName(url), { type: result.type })
     saveAs(file)
   }
-  options.error = (err) => {
+  options.error = err => {
     console.error(err)
     throw new Error(err.message)
   }
