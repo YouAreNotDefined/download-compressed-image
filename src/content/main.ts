@@ -1,7 +1,19 @@
-import { saveAs } from 'file-saver'
-import Compressor from 'compressorjs'
 
-let options: Compressor.Options
+import { saveAs } from 'file-saver'
+import { Options, ImageType } from '../common'
+
+interface result {
+  outputImage: Uint8Array
+  err: Error
+}
+declare function Compress(input: Uint8Array, options: Options): Promise<result>
+
+let options: Options
+
+const response = await fetch('main.wasm');
+const buffer = await response.arrayBuffer();
+const wasmModule = await WebAssembly.instantiate(buffer);
+const wasmInstance = wasmModule.instance
 
 chrome.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(message => {
@@ -10,8 +22,25 @@ chrome.runtime.onConnect.addListener(port => {
       options = JSON.parse(value.options)
     })
     getImage(data.info)
-      .then(blob => {
-        compressSave(blob, data.info.srcUrl)
+      .then(async arrayBuffer => {
+        const imageUint8Array = new Uint8Array(arrayBuffer)
+        const result = await wasmInstance.exports.Compress(imageUint8Array, options)
+        Compress(imageUint8Array, options)
+          .then(result => {
+            const url = getImageUrl(data.info)
+            const type = Object.entries(ImageType).find(([key, value]) => value === options.Type)
+
+            if (!type) {
+              console.error('Output Format Is Invalid')
+              throw new Error('Output Format Is Invalid')
+            }
+            const file = new File([result.outputImage], getImageName(url, type[0]), { type: type[0] })
+            saveAs(file)
+          })
+          .catch(err => {
+            console.error(err)
+            throw new Error(err)
+          })
       })
       .catch(err => {
         console.error(err)
@@ -20,23 +49,11 @@ chrome.runtime.onConnect.addListener(port => {
   })
 })
 
-function compressSave(blob: Blob, url: string) {
-  options.success = (result: Blob) => {
-    const file = new File([result], getImageName(url), { type: result.type })
-    saveAs(file)
-  }
-  options.error = err => {
-    console.error(err)
-    throw new Error(err.message)
-  }
-  new Compressor(blob, options)
-}
-
 async function getImage(info: chrome.contextMenus.OnClickData) {
   const url = getImageUrl(info)
   const res = await fetch(url)
-  const blob = await res.blob()
-  return blob
+  const arrayBuffer = await res.arrayBuffer()
+  return arrayBuffer
 }
 
 function getImageUrl(info: chrome.contextMenus.OnClickData): string {
@@ -45,14 +62,7 @@ function getImageUrl(info: chrome.contextMenus.OnClickData): string {
   return `${info.pageUrl}${info.srcUrl}`
 }
 
-function getImageName(url: string): string {
-  let pattern: RegExp
-  let extend = ''
-  if (options.mimeType === 'auto') {
-    pattern = new RegExp('.+/(.+?)([\?#;].*)?$')
-  } else {
-    pattern = new RegExp('.+/(.+?)\.[a-z]+([\?#;].*)?$')
-    extend = `.${options.mimeType?.replace('image/', '')}`
-  }
-  return `${url.toLowerCase().match(pattern)![1]}${extend}`
+function getImageName(url: string, type: string): string {
+  const pattern = new RegExp('.+/(.+?)\.[a-z]+([\?#;].*)?$')
+  return `${url.toLowerCase().match(pattern)![1]}${type}`
 }

@@ -24,7 +24,7 @@
 		"ghcr.io/guiyomh/features/gotestsum:0": {},
 		"ghcr.io/gickis/devcontainer-features/gomplate:1": {},
 		"ghcr.io/azutake/devcontainer-features/go-packages-install:0": {}
-	}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -42,7 +42,11 @@
 	// "postCreateCommand": "cat /etc/os-release",
 
 	// Configure tool-specific properties.
-	// "customizations": {},
+	"customizations": {
+    "extensions": [
+      "golang.go"
+    ]
+  }
 
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "devcontainer"
