@@ -21,5 +21,6 @@ RUN go get -u github.com/h2non/bimg
 
 COPY package*.json ./
 RUN npm install
+COPY .ssh/ /app/.ssh/
 
 CMD ["bash"]
