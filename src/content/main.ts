@@ -1,5 +1,7 @@
 import { saveAs } from 'file-saver'
-import Compressor from 'compressorjs'
+
+const mod = await WebAssembly.instantiateStreaming(fetch('compress.wasm'))
+const CompressImage = mod.instance.exports.CompressImage
 
 let options: Compressor.Options
 

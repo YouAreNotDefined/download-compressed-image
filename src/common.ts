@@ -1,6 +1,12 @@
-import Compressor from 'compressorjs'
+interface PreprocessOptions {
 
-const defaultOptions: Compressor.Options = {
+}
+
+interface EncodeOptions {
+
+}
+
+const DefaultPreprocessOptions: PreprocessOptions = {
   strict: true,
   checkOrientation: true,
   quality: 0.7,
@@ -12,4 +18,16 @@ const defaultOptions: Compressor.Options = {
   maxHeight: 1000
 }
 
-export { defaultOptions }
+const DefaultEncodeOptions: EncodeOptions = {
+  strict: true,
+  checkOrientation: true,
+  quality: 0.7,
+  resize: 'none',
+  width: 640,
+  height: 640,
+  mimeType: 'auto',
+  maxWidth: 1000,
+  maxHeight: 1000
+}
+
+export { DefaultPreprocessOptions, DefaultEncodeOptions, PreprocessOptions, EncodeOptions }

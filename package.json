@@ -11,6 +11,7 @@
   "main": "index.js",
   "dependencies": {
     "@mdi/font": "5.9.55",
+    "@squoosh/lib": "^0.5.3",
     "@types/chrome": "0.0.197",
     "@types/file-saver": "^2.0.5",
     "@types/node": "^18.7.18",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.1",
     "@babel/preset-env": "^7.19.1",
+    "assemblyscript": "^0.27.2",
     "babel-loader": "^8.2.5",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^11.0.0",
