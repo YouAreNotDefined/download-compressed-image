@@ -3,7 +3,7 @@ FROM golang:latest
 WORKDIR /app
 
 RUN apt-get update && \
-  apt-get install -y pkg-config nodejs npm git libvips-dev
+  apt-get install -y nodejs npm git
 
 COPY go.mod ./
 
@@ -18,7 +18,6 @@ RUN go install github.com/go-delve/delve/cmd/dlv@latest
 RUN go install golang.org/x/lint/golint@latest
 RUN go install golang.org/x/tools/gopls@latest
 
-RUN go get -u github.com/h2non/bimg@latest
 RUN go mod tidy
 
 COPY package*.json ./
