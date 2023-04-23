@@ -7,17 +7,17 @@ const ImageType = {
 type ImageType = typeof ImageType[keyof typeof ImageType]
 
 interface Options {
-  Height: Number
-  Width: Number
-  Quality: Number
+  Height: number
+  Width: number
+  Quality: number
   Type: ImageType
 }
 
 const defaultOptions: Options = {
-  Quality: 70,
+  Quality: 0.7,
   Width: 640,
   Height: 640,
-  Type: 1
+  Type: 0
 }
 
 export { defaultOptions, Options, ImageType }

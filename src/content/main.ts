@@ -6,14 +6,8 @@ interface result {
   outputImage: Uint8Array
   err: Error
 }
-declare function Compress(input: Uint8Array, options: Options): Promise<result>
 
 let options: Options
-
-const response = await fetch('main.wasm');
-const buffer = await response.arrayBuffer();
-const wasmModule = await WebAssembly.instantiate(buffer);
-const wasmInstance = wasmModule.instance
 
 chrome.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(message => {
@@ -24,12 +18,13 @@ chrome.runtime.onConnect.addListener(port => {
     getImage(data.info)
       .then(async arrayBuffer => {
         const imageUint8Array = new Uint8Array(arrayBuffer)
-        const result = await wasmInstance.exports.Compress(imageUint8Array, options)
-        Compress(imageUint8Array, options)
-          .then(result => {
+        const wasmCode = await fetch('./main.wasm')
+        WebAssembly.instantiate(wasmCode, {})
+          .then(instance => {
+            const Compress = instance.exports.Compress as CallableFunction
+            const result: result = Compress(imageUint8Array, options)
             const url = getImageUrl(data.info)
-            const type = Object.entries(ImageType).find(([key, value]) => value === options.Type)
-
+            const type = Object.entries(ImageType).find(([_key, value]) => value === options.Type)
             if (!type) {
               console.error('Output Format Is Invalid')
               throw new Error('Output Format Is Invalid')
@@ -64,5 +59,5 @@ function getImageUrl(info: chrome.contextMenus.OnClickData): string {
 
 function getImageName(url: string, type: string): string {
   const pattern = new RegExp('.+/(.+?)\.[a-z]+([\?#;].*)?$')
-  return `${url.toLowerCase().match(pattern)![1]}${type}`
+  return `${url.toLowerCase().match(pattern)![1]}${type.toLowerCase}`
 }
