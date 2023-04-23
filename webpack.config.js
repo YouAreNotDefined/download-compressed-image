@@ -95,6 +95,10 @@ module.exports = {
         {
           from: '**/*',
           context: 'public'
+        },
+        {
+          from: '**/*',
+          context: 'wasm'
         }
       ]
     })
