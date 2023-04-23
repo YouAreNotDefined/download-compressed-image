@@ -1,15 +1,23 @@
-import Compressor from 'compressorjs'
-
-const defaultOptions: Compressor.Options = {
-  strict: true,
-  checkOrientation: true,
-  quality: 0.7,
-  resize: 'none',
-  width: 640,
-  height: 640,
-  mimeType: 'auto',
-  maxWidth: 1000,
-  maxHeight: 1000
+const ImageType = {
+  JPEG: 0,
+  PNG: 1,
+  GIF: 2,
 }
 
-export { defaultOptions }
+type ImageType = typeof ImageType[keyof typeof ImageType]
+
+interface Options {
+  Height: number
+  Width: number
+  Quality: number
+  Type: ImageType
+}
+
+const defaultOptions: Options = {
+  Quality: 0.7,
+  Width: 640,
+  Height: 640,
+  Type: 0
+}
+
+export { defaultOptions, Options, ImageType }

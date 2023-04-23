@@ -8,40 +8,26 @@
         <v-col class="pa-8">
           <v-form v-model="isValidated">
             <h1 class="h1 mb-3">Configuration</h1>
-            <v-select
-              v-model="options.resize"
-              :rules="rules.resize"
-              required
-              class="mb-2"
-              :items="resizeList"
-              label="Resize Format"
-              persistent-hint
-            />
             <v-text-field
-              v-model="options.width"
+              v-model="options.Width"
               class="mb-2"
               label="Width of the output image"
               outlined
               type="number"
-              persistent-hint
-              hint="If the Height option is set, the Width will be computed automatically"
             />
             <v-text-field
-              v-model="options.height"
+              v-model="options.Height"
               class="mb-2"
               label="Height of the output image"
               outlined
               type="number"
-              persistent-hint
-              hint="If the Width option is set, the Height will be computed automatically"
             />
-            <h2 class="h2 mb-2">COMPRESS</h2>
             <v-select
-              v-model="options.mimeType"
-              :rules="rules.mime"
+              v-model="options.Type"
+              :rules="rules.type"
               required
               class="mb-2"
-              :items="mimeList"
+              :items="typeList"
               label="Output Format"
             />
             <v-slider
@@ -52,24 +38,6 @@
               max="100"
               min="0"
               required
-            />
-            <v-text-field
-              v-model="options.maxWidth"
-              :rules="rules.number"
-              required
-              class="mb-2"
-              label="Output Image Max Width"
-              outlined
-              type="number"
-            />
-            <v-text-field
-              v-model="options.maxHeight"
-              :rules="rules.number"
-              required
-              class="mb-2"
-              label="Output Image Max Height"
-              outlined
-              type="number"
             />
             <v-alert v-show="!isValidated" class="mb-3" type="error">There is an incorrect entry</v-alert>
             <div class="text-center">
@@ -93,53 +61,43 @@
 <script lang="ts">
 import { Vue } from 'vue-property-decorator'
 import Component from 'vue-class-component'
-import { VBtn, VApp, VContainer, VSwitch, VSelect, VCheckbox, VTextField, VSlider } from 'vuetify/lib'
+import { VBtn, VApp, VContainer, VSelect, VTextField, VSlider } from 'vuetify/lib'
+import { defaultOptions, ImageType } from '../common';
 
 @Component({
   components: {
-    VBtn, VApp, VContainer, VSwitch, VSelect, VCheckbox, VTextField, VSlider
+    VBtn, VApp, VContainer, VSelect, VTextField, VSlider
   },
 })
 
 export default class App extends Vue {
-  options: Compressor.Options = {}
-  readonly resizeList = ['none', 'contain', 'cover']
-  readonly mimeList = ['auto', 'image/jpeg', 'image/png', 'image/webp']
+  options = defaultOptions
+  readonly typeList = Object.keys(ImageType)
   saving = false
   rules = {
     number: [
       (v: number) => !!v || 'This is required',
       (v: number) => !isNaN(v) || 'This must be Number',
     ],
-    resize: [
+    type: [
       (v: string) => !!v || 'This is required',
-      (v: string) => this.resizeList.includes(v) || 'Incorrect choice',
-    ],
-    mime: [
-      (v: string) => !!v || 'This is required',
-      (v: string) => this.mimeList.includes(v) || 'Incorrect choice',
+      (v: string) => this.typeList.includes(v) || 'Incorrect choice',
     ],
   }
   isValidated = false
 
   public get quality(): number {
-    if (this.options.quality === undefined) return 70
-    return this.options.quality * 100
+    if (this.options.Quality == null) return 70
+    return this.options.Quality * 100
   }
   public set quality(v: number) {
-    this.options.quality = v / 100
-  }
-
-  public mounted() {
-    chrome.storage.local.get('options', value => {
-      this.options = JSON.parse(value.options)
-    })
+    this.options.Quality = v / 100
   }
 
   saveOptions() {
     if(!this.isValidated) return
     this.saving = true
-    chrome.storage.local.set({'options': JSON.stringify(this.options)}, () => {
+    chrome.storage.local.set({ 'options': JSON.stringify(this.options) }, () => {
       setTimeout(() => {
         this.saving = false
       }, 500)
